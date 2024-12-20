@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from database import get_data_from_db, save_data_to_db
-from models.prediction_model import predict_next_hour
+from models.prediction_model import predict_next_hour, train_model
 import requests
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def update_data():
     save_data_to_db(data)
 
     # Retrain models periodically (every 10 minutes or based on your choice)
-    # train_model()
+    train_model()
 
     return jsonify({"status": "success", "data": data}), 200
 
@@ -35,6 +35,11 @@ def update_data():
 def predict():
     prediction = predict_next_hour()  # Use the trained model to make predictions
     return jsonify({"prediction": prediction}), 200
+
+@app.route('/api/crypto_data', methods=['GET'])
+def get_crypto_data():
+    data = get_data_from_db()
+    return jsonify(data.to_dict(orient='records')), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
